@@ -1,66 +1,9 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/FormDeviceParams.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/ServerDb.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/Device.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/MainForm.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/PanelDevice.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/PackageData.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/DeviceListener.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/IconDeviceStatus.java</file>
+            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/TESTCLASS.java</file>
         </group>
     </open-files>
 </project-private>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/FormDeviceParams.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/Device.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/MainForm.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/PanelDevice.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/DeviceListener.java</file>
-        </group>
-    </open-files>
-</project-private>
->>>>>>> 6b066e53077317efc19a3114c744897b83863ced
-=======
-<<<<<<< HEAD
-<?xml version="1.0" encoding="UTF-8"?>
-<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/FormDeviceParams.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/Device.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/MainForm.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/UI/PanelDevice.java</file>
-            <file>file:/D:/Java/javaprojects/Moscow_Ultra/trekerManager/src/trekermanager/DeviceListener.java</file>
-        </group>
-    </open-files>
-</project-private>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/E:/Реализация/Java/trekerManager/src/trekermanager/Pack.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/trekermanager/TrackerConnect.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/trekermanager/ServerDb.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/trekermanager/PackageData.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/UI/PanelDevice.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/UI/MainForm.java</file>
-            <file>file:/E:/Реализация/Java/trekerManager/src/UI/Start.java</file>
-        </group>
-    </open-files>
-</project-private>
->>>>>>> origin/master
->>>>>>> origin/master
