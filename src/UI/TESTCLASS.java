@@ -11,6 +11,10 @@ package UI;
  */
 public class TESTCLASS {
 
+<<<<<<< HEAD
+=======
+    //Привет 
+>>>>>>> origin/master
     //Привет Ден
     //Превед
     
