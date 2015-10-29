@@ -11,7 +11,7 @@ package UI;
  */
 public class TESTCLASS {
 
-    //Привет Ден2
+    //Привет 
     //Привет Ден
     //Превед
     
