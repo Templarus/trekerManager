@@ -1,9 +1,10 @@
-/dist/
-/build/
+/dist/*
+/build/*
+/nbproject/*
+/ArhDb/*
 *.class
 *.bak
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+
 
 # Package Files #
 *.jar
