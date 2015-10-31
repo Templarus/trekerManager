@@ -12,27 +12,27 @@ import java.util.logging.Logger;
 public class DeviceListener implements Runnable {
 
     private ServerSocket serverSocket;
+    private Device device;
     private Socket cs;
-    private String id;
-    private int port;
 
     public DeviceListener() {
-        this("123456789012345", 5601);
+        this(new Device());
     }
 
-    public DeviceListener(String id, int port) {
-        this.id = id;
-        this.port = port;
+    public DeviceListener(Device d) {
+        this.device = d;
     }
 
     private void makeConnection() {
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(device.getPort());
             Socket cs = new Socket();
             cs = serverSocket.accept();
-            while (true) {
+            boolean status=Start.mf.getWatcherStatus(device);
+            while (status) {
                 if (!cs.isClosed()) {
-                    Start.mf.deviceConnection(this.id, true);
+                    Start.mf.setWatcherStatus(device, true);
+                    Start.mf.deviceConnection(device.getId(), true);
                     InputStream in = cs.getInputStream();
                     OutputStream out = cs.getOutputStream();
                     byte[] incoming = new byte[256];
@@ -42,9 +42,10 @@ public class DeviceListener implements Runnable {
                     out.write(reply.getBytes());
                     System.out.println("DeviceListener: getPacket executed");
                 } else {
-                    Start.mf.deviceConnection(this.id, false);
+                    Start.mf.deviceConnection(device.getId(), false);
                 }
             }
+            Start.mf.setWatcherStatus(device, false);
         } catch (IOException ex) {
             Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -114,7 +115,7 @@ public class DeviceListener implements Runnable {
         ibutton = body[14];
         params = body[15];
 
-        PackageData D = new PackageData(id, date, time, lat, lon, speed, course, height, sats, hdop, digitinput, digitouput, ads, ibutton, params);
+        PackageData D = new PackageData(device.getId(), date, time, lat, lon, speed, course, height, sats, hdop, digitinput, digitouput, ads, ibutton, params);
         System.out.println("DeviceListener: getData executed");
 
         return D;
@@ -122,7 +123,7 @@ public class DeviceListener implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("DeviceListener: Listener" + id + "__" + port + " created");
+        System.out.println("DeviceListener: Listener" + device.getId() + "__" + device.getPort() + " created");
         makeConnection();
     }
 }

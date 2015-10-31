@@ -10,12 +10,15 @@ import javax.swing.JScrollPane;
 import trekermanager.Device;
 import trekermanager.DeviceListener;
 import trekermanager.ServerDb;
+import trekermanager.Watcher;
 
 public class MainForm extends javax.swing.JFrame {
 
     private Map DeviceList = new HashMap<String, Device>();
-    public static FormDeviceParams FDP;
     private Map PanelDeviceList = new HashMap<String, PanelDevice>();
+    private Map WatcherList = new HashMap<Device, Boolean>();
+    public static FormDeviceParams FDP;
+
     public ServerDb sdb;
     private javax.swing.JPanel PanelPane;
 
@@ -86,6 +89,22 @@ public class MainForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    public void setWatcherStatus(Device d, boolean status) {
+        WatcherList.put(d, status);
+    }
+
+    public boolean getWatcherStatus(Device d) {
+        return (Boolean) WatcherList.get(d);
+    }
+
+    public Set<String> getDevicesKeySet() {
+        Set<String> keys = DeviceList.keySet();
+        return keys;
+    }
+
+    public Map getDeviceList() {
+        return DeviceList;
+    }
 
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
         System.out.println("MainForm: AddButtonActionPerformed clicked");
@@ -101,16 +120,16 @@ public class MainForm extends javax.swing.JFrame {
     private void formAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_formAncestorResized
         int Hgap = this.getPreferredSize().height - this.getSize().height;
         int Wgap = this.getPreferredSize().width - this.getSize().width;
-       PanelPane.setPreferredSize(new java.awt.Dimension(Start.mf.PanelPane.getPreferredSize().width+Wgap,Start.mf.PanelPane.getPreferredSize().height+ Hgap));
-        PanelScrolPane.setPreferredSize(new java.awt.Dimension(Start.mf.PanelScrolPane.getPreferredSize().width+Wgap, Start.mf.PanelScrolPane.getPreferredSize().height+Hgap));
+        PanelPane.setPreferredSize(new java.awt.Dimension(Start.mf.PanelPane.getPreferredSize().width + Wgap, Start.mf.PanelPane.getPreferredSize().height + Hgap));
+        PanelScrolPane.setPreferredSize(new java.awt.Dimension(Start.mf.PanelScrolPane.getPreferredSize().width + Wgap, Start.mf.PanelScrolPane.getPreferredSize().height + Hgap));
         PanelPane.revalidate();
         PanelScrolPane.revalidate();
 
     }//GEN-LAST:event_formAncestorResized
 
     private void butTrackerDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butTrackerDataActionPerformed
-       TrekerData td = new TrekerData();
-       td.setVisible(true);
+        TrekerData td = new TrekerData();
+        td.setVisible(true);
     }//GEN-LAST:event_butTrackerDataActionPerformed
 
     public static void main(String args[]) {
@@ -149,16 +168,16 @@ public class MainForm extends javax.swing.JFrame {
 
         testArray();
         drawPanels();
+        createWatcher();
         System.out.println("MainForm: load executed");
         return true;
     }
 
     private void testArray() {
-        for(Device dev:sdb.getDeviceList())
-        {
+        for (Device dev : sdb.getDeviceList()) {
             addDevice(dev);
         }
-      
+
 //        Device testDevice = new Device();
 //        addDevice(testDevice);
 //        Device testDevice1 = new Device("100000000000001", 5602,"1234", false, false);
@@ -179,15 +198,6 @@ public class MainForm extends javax.swing.JFrame {
 //        addDevice(testDevice8);
 //        Device testDevice9 = new Device("100000000000009", 5610,"1234", false, false);
 //        addDevice(testDevice9);
-    }
-
-    public void reload() {
-        PanelPane.removeAll();
-        //DeviceList.clear();
-        PanelDeviceList.clear();
-        drawPanels();
-        System.out.println("MainForm: reload executed");
-
     }
 
     private void createPanelPane() {
@@ -231,11 +241,29 @@ public class MainForm extends javax.swing.JFrame {
         System.out.println("MainForm: drawPanels executed");
 
     }
+    
+    private void createWatcher()
+    {
+      Watcher watcher = new Watcher();
+        Thread t2 = new Thread(watcher);
+        t2.start();
+        System.out.println("MainForm: watcher created");  
+    }
+
+    public void reload() {
+        PanelPane.removeAll();
+        //DeviceList.clear();
+        PanelDeviceList.clear();
+        drawPanels();
+        System.out.println("MainForm: reload executed");
+
+    }
 
     public boolean addDevice(Device d) {
         System.out.println("MainForm: addDevice started");
         if (!DeviceList.containsKey(d.getId())) {
             DeviceList.put(d.getId(), d);
+            WatcherList.put(d, true);
             createListener(d);
             System.out.println("MainForm: addDevice executed, Device " + d.getId() + " added, listener awaiting for connections");
             return true;
@@ -264,12 +292,14 @@ public class MainForm extends javax.swing.JFrame {
         System.out.println("MainForm: deviceStatus" + device.getId() + "executed=" + status);
     }
 
-    private void createListener(Device device) {
-        DeviceListener DL = new DeviceListener(device.getId(), device.getPort());
+    public void createListener(Device device) {
+        DeviceListener DL = new DeviceListener(device);
         Thread t1 = new Thread(DL);
         t1.start();
         System.out.println("MainForm: createListener executed");
     }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddButton;
     private javax.swing.JPanel PanelFont;
