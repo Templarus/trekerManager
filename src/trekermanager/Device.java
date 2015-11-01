@@ -1,5 +1,7 @@
 package trekermanager;
 
+
+// класс предназначенный для комплексного хранения информации об устройстве в его полях.(сущность)
 public class Device {
 
     private String id = "";

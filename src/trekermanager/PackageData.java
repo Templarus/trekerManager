@@ -1,16 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package trekermanager;
-
 import UI.Start;
 
-/**
- *
- * @author RusTe
- */
+// класс расширяющий абстрактный Pack до пакета с данными. Сделано на всякий случай - если будут ещё другие пакеты и их тоже нужно будет обрабатывать аналогичными способами
+// так же, при инициализации через конструктор, происходит запись пакета в базу данных при помощи переопределённого метода
 public class PackageData extends Pack {
 
     String id;
@@ -60,7 +52,7 @@ public class PackageData extends Pack {
         System.out.println("Параметры:" + this.params);
         System.out.println("Состояние устройства:" + this.input1);
     }
-
+// input2 - boolean отображение дискретного сигнала(0,1) с устройства.
     @Override
     public void SaveToDB() {
         System.out.println("PackageData: SaveToDB executed");

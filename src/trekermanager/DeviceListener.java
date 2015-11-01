@@ -9,14 +9,16 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//Класс предназначенный для создания и обработки соединения с одним устройством
 public class DeviceListener implements Runnable {
 
     private ServerSocket serverSocket;
     private Device device;
     private Socket cs;
+    private boolean status = true;  // статус соединения\открытого ClientSocker
 
     public DeviceListener() {
-        this(new Device());
+        this(new Device()); // пустой конструктор Device вернёт элемент с стандартными данными
     }
 
     public DeviceListener(Device d) {
@@ -26,26 +28,27 @@ public class DeviceListener implements Runnable {
     private void makeConnection() {
         try {
             serverSocket = new ServerSocket(device.getPort());
-            Socket cs = new Socket();
-            cs = serverSocket.accept();
-            boolean status=Start.mf.getWatcherStatus(device);
+            Socket clientSocket = new Socket();
+            clientSocket = serverSocket.accept();
+            status = Start.mf.getWatcherStatus(device); // в локальную переменную записываем значение из MainForm - изначально оно = true
             while (status) {
-                if (!cs.isClosed()) {
-                    Start.mf.setWatcherStatus(device, true);
-                    Start.mf.deviceConnection(device.getId(), true);
-                    InputStream in = cs.getInputStream();
-                    OutputStream out = cs.getOutputStream();
+                if (!clientSocket.isClosed()) { // подлежит доработке для адекватной отработки кода
+                    Start.mf.setWatcherStatus(device, true); // логическое дублирование, если сокет запущен вторично. вероятно бесполезно
+                    Start.mf.deviceConnection(device.getId(), true); // если .accept прошёл - TCP соединение установлено
+                    InputStream in = clientSocket.getInputStream();
+                    OutputStream out = clientSocket.getOutputStream();
                     byte[] incoming = new byte[256];
                     int length = in.read(incoming);
                     System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
-                    String reply = makeAnswer(incoming);
+                    String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
                     out.write(reply.getBytes());
                     System.out.println("DeviceListener: getPacket executed");
                 } else {
                     Start.mf.deviceConnection(device.getId(), false);
                 }
+                //status = Start.mf.getWatcherStatus(device); // т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
             }
-            Start.mf.setWatcherStatus(device, false);
+            Start.mf.setWatcherStatus(device, false); // т.к. мы вышли из цикла while-> соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
         } catch (IOException ex) {
             Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -53,20 +56,26 @@ public class DeviceListener implements Runnable {
 
     private String makeAnswer(byte[] data) {
         String message[] = new String(data).trim().split("#");
-        switch (message[1]) {
-            case "L":
-                return "#AL#1\r\n";
+        System.out.println("Message. mess[0]=" + message[0] + "mess length=" + message.length);
+//        System.out.println("Message. mess[0]=" + message[0] + " mess[1]=" + message[1]);
+//        System.out.println("Message. mess[0]=" + message[0] + " mess[1]=" + message[1] + " mess[2]=" + message[2]);
+        if (message.length > 2) {
+            switch (message[1]) {
+                case "L":
+                    return "#AL#1\r\n";
 
-            case "D":
-                getData(message[2]);
-                return "#AD#1\r\n";
+                case "D": // пакет с данными - требуется его разборка, вызывается метод getData, в котором происходит создание элемента класса PackageData( абстр Pack)
+                    getData(message[2]);
+                    return "#AD#1\r\n";
 
-            case "P":
-                return "#AP#\r\n";
+                case "P":
+                    return "#AP#\r\n";
+            }
         }
         return "";
-    }
 
+    }
+// разборка пакета с данными на собственно данные
     private Pack getData(String message) {
 
         String body[] = message.split(";");

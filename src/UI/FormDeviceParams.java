@@ -1,16 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package UI;
 
 import trekermanager.Device;
-
-/**
- *
- * @author RusTe
- */
+// Popup используемый для ввода нового устройсва в ручном режиме.
 public class FormDeviceParams extends javax.swing.JDialog {
 
     /**
@@ -110,11 +101,11 @@ public class FormDeviceParams extends javax.swing.JDialog {
     }//GEN-LAST:event_ButtonDiscardActionPerformed
 
     private void ButtonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonOkActionPerformed
-        if (TextFieldId.getText().matches("\\d{15}")) {
-            if (Integer.parseInt(TextFieldPort.getText()) != 0) {
+        if (TextFieldId.getText().matches("\\d{15}")) { // проверка по маске - 15 цифровых символов
+            if (Integer.parseInt(TextFieldPort.getText()) != 0) { // порт не ограничен нормально, но всё равно - цифры и не 0
                 Device device = new Device(TextFieldId.getText(), Integer.parseInt(TextFieldPort.getText()),TextFieldPass1.getText());
                 System.out.println("FormDeviceParams: Device" + TextFieldId.getText() + " Added");
-                if (Start.mf.addDevice(device)) {
+                if (Start.mf.addDevice(device)) { // если такого устройства нет в DeviceList - оно записывается в справочник DB и добавляется для отрисовки
                     Start.mf.sdb.setDevice(device);
                     System.out.println("FormDeviceParams: Device Added");
                     Start.mf.reload();

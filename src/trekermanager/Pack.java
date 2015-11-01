@@ -1,14 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package trekermanager;
-
-/**
- *
- * @author RusTe
- */
+// абстрактный класс для пакетов. Содержит 2 метода, требующих переопределения у наследников- Print и SaveToDb
 public abstract class Pack {
     
     public void Print()

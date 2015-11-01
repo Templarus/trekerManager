@@ -14,10 +14,10 @@ import trekermanager.Watcher;
 
 public class MainForm extends javax.swing.JFrame {
 
-    private Map DeviceList = new HashMap<String, Device>();
-    private Map PanelDeviceList = new HashMap<String, PanelDevice>();
-    private Map WatcherList = new HashMap<Device, Boolean>();
-    public static FormDeviceParams FDP;
+    private Map DeviceList = new HashMap<String, Device>();  //содержит "список устройств", ключ = id устройства
+    private Map PanelDeviceList = new HashMap<String, PanelDevice>(); //содержит "список панелей" для отображения статуса устройств, ключ = id устройства
+    private Map WatcherList = new HashMap<Device, Boolean>(); // содержит статусы DeviceListener для каждого устройства, ключ = указатель на устройство
+    public static FormDeviceParams FDP; // popup для добавления нового устройства в пул "на лету"
 
     public ServerDb sdb;
     private javax.swing.JPanel PanelPane;
@@ -89,14 +89,28 @@ public class MainForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+ /**
+     *
+     * @param d - Device object
+     * @param status - Listener status ( true= online)
+     */
     public void setWatcherStatus(Device d, boolean status) {
         WatcherList.put(d, status);
     }
 
+    /**
+     *
+     * @param d - Device object
+     * @return status of selected Listener
+     */
     public boolean getWatcherStatus(Device d) {
         return (Boolean) WatcherList.get(d);
     }
 
+    /**
+     *
+     * @return keySet of device id`s as Set string from DeviceList
+     */
     public Set<String> getDevicesKeySet() {
         Set<String> keys = DeviceList.keySet();
         return keys;
@@ -162,46 +176,28 @@ public class MainForm extends javax.swing.JFrame {
         });
     }
 
+    // собственно первый исполняемый метод - первичаная загрузка
     private boolean load() {
         System.out.println("MainForm:Load Started");
-        sdb = new ServerDb("jdbc:sqlserver://MAIN:1433;databaseName=UltraFiolet", "sa", "Zx3d2818!");
+        sdb = new ServerDb("jdbc:sqlserver://MAIN:1433;databaseName=UltraFiolet", "sa", "Zx3d2818!"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
 
-        testArray();
-        drawPanels();
-        createWatcher();
+        loadDBdata(); // чтение изначальной конфигурации - создание списка DeviceList
+        drawPanels(); // отрисовка внешнего вида согласно прочитанной конфигурации
+        createWatcher(); // создание наблюдателей для каждого устройства (созданного listener)
         System.out.println("MainForm: load executed");
         return true;
     }
 
-    private void testArray() {
+    private void loadDBdata() {
         for (Device dev : sdb.getDeviceList()) {
             addDevice(dev);
         }
 
-//        Device testDevice = new Device();
-//        addDevice(testDevice);
-//        Device testDevice1 = new Device("100000000000001", 5602,"1234", false, false);
-//        addDevice(testDevice1);
-//        Device testDevice2 = new Device("100000000000002", 5603,"1234", false, false);
-//        addDevice(testDevice2);
-//        Device testDevice3 = new Device("100000000000003", 5604,"1234", false, false);
-//        addDevice(testDevice3);
-//        Device testDevice4 = new Device("100000000000004", 5605,"1234", false, false);
-//        addDevice(testDevice4);
-//        Device testDevice5 = new Device("100000000000005", 5606,"1234", false, false);
-//        addDevice(testDevice5);
-//        Device testDevice6 = new Device("100000000000006", 5607,"1234", false, false);
-//        addDevice(testDevice6);
-//        Device testDevice7 = new Device("100000000000007", 5608,"1234", false, false);
-//        addDevice(testDevice7);
-//        Device testDevice8 = new Device("100000000000008", 5609,"1234", false, false);
-//        addDevice(testDevice8);
-//        Device testDevice9 = new Device("100000000000009", 5610,"1234", false, false);
-//        addDevice(testDevice9);
     }
 
+    // метод динамического создания вложенного в PanelScrolPane(элемент с полосой прокрутки) элемента Jpanel - в нём отображается набор элементов PanelDevice
     private void createPanelPane() {
-        PanelPane = new javax.swing.JPanel();
+        PanelPane = new javax.swing.JPanel(); // вложенная вJpanel
         PanelPane.setPreferredSize(new java.awt.Dimension(418, 228));
         javax.swing.GroupLayout PanelPaneLayout = new javax.swing.GroupLayout(PanelPane);
         PanelPaneLayout.setHorizontalGroup(
@@ -216,16 +212,16 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void drawPanels() {
-        int i = 0;
+        int i = 0; // счётчик, используемый для рассчёта отрисовки
         Set<String> keys = DeviceList.keySet();
         createPanelPane();
 
         for (String key : keys) {
             Device device = (Device) DeviceList.get(key);
-            PanelDevice pd = new PanelDevice(device);
+            PanelDevice pd = new PanelDevice(device); // для каждого элемента создаётся своя "панелька", в неё передаётся device, который разбирается внутри
             pd.setBounds(0, 70 * i, pd.getPreferredSize().width, 60);
             pd.setAlignmentX(PanelDevice.CENTER_ALIGNMENT);
-            PanelPane.add(pd);
+            PanelPane.add(pd);// добавляем панельку на Jpanel, который будет встроен в Scroll Pane
             pd.setVisible(true);
 
             i++;
@@ -241,30 +237,30 @@ public class MainForm extends javax.swing.JFrame {
         System.out.println("MainForm: drawPanels executed");
 
     }
-    
-    private void createWatcher()
-    {
-      Watcher watcher = new Watcher();
+
+// создание наблюдталея в отдельном потоке
+    private void createWatcher() {
+        Watcher watcher = new Watcher();
         Thread t2 = new Thread(watcher);
         t2.start();
-        System.out.println("MainForm: watcher created");  
+        System.out.println("MainForm: watcher created");
     }
 
+// метод перерисовски формы - используется при добавлении\удалении нового устройства - актуализация DeviceList происходит извне и уже выполнена к началу перерисовки
     public void reload() {
         PanelPane.removeAll();
-        //DeviceList.clear();
         PanelDeviceList.clear();
         drawPanels();
         System.out.println("MainForm: reload executed");
-
     }
 
+    // метод добавления нового устройсва в Map DeviceList - возвращает false, если устройство уже существует в списке
     public boolean addDevice(Device d) {
         System.out.println("MainForm: addDevice started");
-        if (!DeviceList.containsKey(d.getId())) {
-            DeviceList.put(d.getId(), d);
-            WatcherList.put(d, true);
-            createListener(d);
+        if (!DeviceList.containsKey(d.getId())) { // если такого устройство существует в списке - возвращает false
+            DeviceList.put(d.getId(), d); // добавляем новое устройство в список устройств
+            createListener(d); // создаём Listener для устройсва
+            WatcherList.put(d, true); // добавляем в список для наблюдения 
             System.out.println("MainForm: addDevice executed, Device " + d.getId() + " added, listener awaiting for connections");
             return true;
         } else {
@@ -274,24 +270,26 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     /**
-     *
-     * @param id
-     * @param connection
+     * метод подлежит актуализации и переработке
+     * @param id -id устройсва
+     * @param connection - boolean состояния соединения, true - установлено
      */
+    //метод используется для актуализации визуального отображения состояния коннекта.
     public void deviceConnection(String id, boolean connection) {
         Device device = (Device) Start.mf.DeviceList.get(id);
         device.setConnection(connection);
         System.out.println("MainForm: deviceConnection " + device.getId() + " executed=" + connection);
         PanelDevice pd = (PanelDevice) PanelDeviceList.get(device.getId());
-        pd.redrawPanel();
+        pd.redrawPanel(); // метод перерисовки панели (изменение цвета индикатора)
     }
-
+// метод аналогичный предыдущему - используется для актуализации состояния контроллируемого оборудования (true - включено)
     public void deviceStatus(String id, boolean status) {
         Device device = (Device) DeviceList.get(id);
         device.setStatus(status);
         System.out.println("MainForm: deviceStatus" + device.getId() + "executed=" + status);
     }
 
+// метод, в используемый для создания Listener для каждого устройства
     public void createListener(Device device) {
         DeviceListener DL = new DeviceListener(device);
         Thread t1 = new Thread(DL);
