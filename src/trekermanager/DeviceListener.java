@@ -41,14 +41,19 @@ public class DeviceListener implements Runnable {
                     int length = in.read(incoming);
                     System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
                     String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
-                    out.write(reply.getBytes());
-                    System.out.println("DeviceListener: getPacket executed");
+                    if (reply.equals("empty")) { //если вернулось empty - устройство разорвало соединение со своей стороны.
+                        cs.close();
+                        Start.mf.setWatcherStatus(device, false); // соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
+
+                    } else {
+                        out.write(reply.getBytes());
+                        System.out.println("DeviceListener: getPacket executed");
+                    }
                 } else {
                     Start.mf.deviceConnection(device.getId(), false);
                 }
-                //status = Start.mf.getWatcherStatus(device); // т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
+                status = Start.mf.getWatcherStatus(device); // т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
             }
-            Start.mf.setWatcherStatus(device, false); // т.к. мы вышли из цикла while-> соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
         } catch (IOException ex) {
             Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -57,9 +62,7 @@ public class DeviceListener implements Runnable {
     private String makeAnswer(byte[] data) {
         String message[] = new String(data).trim().split("#");
         System.out.println("Message. mess[0]=" + message[0] + "mess length=" + message.length);
-//        System.out.println("Message. mess[0]=" + message[0] + " mess[1]=" + message[1]);
-//        System.out.println("Message. mess[0]=" + message[0] + " mess[1]=" + message[1] + " mess[2]=" + message[2]);
-        if (message.length > 2) {
+        if (message.length > 1) {
             switch (message[1]) {
                 case "L":
                     return "#AL#1\r\n";
@@ -72,15 +75,16 @@ public class DeviceListener implements Runnable {
                     return "#AP#\r\n";
             }
         }
-        return "";
+        return "empty";
 
     }
 // разборка пакета с данными на собственно данные
+
     private Pack getData(String message) {
 
         String body[] = message.split(";");
-        int date = 0;
-        int time = 0;
+        String date = "";
+        String time = "";
         String lat = "";
         String lon = "";
         int speed = 0;
@@ -94,8 +98,8 @@ public class DeviceListener implements Runnable {
         String ibutton;
         String params;
 
-        date = Integer.parseInt(body[0]);
-        time = Integer.parseInt(body[1]);
+        date = body[0];
+        time = body[1];
         lat = body[2] + "," + body[3];
         lon = body[4] + "," + body[5];
         if (!body[6].equals("NA")) {

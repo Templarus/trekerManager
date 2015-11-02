@@ -276,7 +276,6 @@ public class MainForm extends javax.swing.JFrame {
         if (!DeviceList.containsKey(d.getId())) { // если такого устройство существует в списке - возвращает false
             DeviceList.put(d.getId(), d); // добавляем новое устройство в список устройств
             createListener(d); // создаём Listener для устройсва
-            WatcherList.put(d, true); // добавляем в список для наблюдения 
             System.out.println("MainForm: addDevice executed, Device " + d.getId() + " added, listener awaiting for connections");
             return true;
         } else {
@@ -287,6 +286,7 @@ public class MainForm extends javax.swing.JFrame {
 
     /**
      * метод подлежит актуализации и переработке
+     *
      * @param id -id устройсва
      * @param connection - boolean состояния соединения, true - установлено
      */
@@ -299,6 +299,7 @@ public class MainForm extends javax.swing.JFrame {
         pd.redrawPanel(); // метод перерисовки панели (изменение цвета индикатора)
     }
 // метод аналогичный предыдущему - используется для актуализации состояния контроллируемого оборудования (true - включено)
+
     public void deviceStatus(String id, boolean status) {
         Device device = (Device) DeviceList.get(id);
         device.setStatus(status);
@@ -308,6 +309,7 @@ public class MainForm extends javax.swing.JFrame {
 // метод, в используемый для создания Listener для каждого устройства
     public void createListener(Device device) {
         DeviceListener DL = new DeviceListener(device);
+        WatcherList.put(device, true); // добавляем в список для наблюдения 
         Thread t1 = new Thread(DL);
         t1.start();
         System.out.println("MainForm: createListener executed");

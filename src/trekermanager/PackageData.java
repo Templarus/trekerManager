@@ -6,8 +6,8 @@ import UI.Start;
 public class PackageData extends Pack {
 
     String id;
-    int date;
-    int time;
+    String date;
+    String time;
     String lat = "";
     String lon = "";
     int speed;
@@ -23,7 +23,7 @@ public class PackageData extends Pack {
     boolean input1;
     boolean input2;
 
-    public PackageData(String id, int date, int time, String lat, String lon, int speed, int course, int height, int sats, float hdop, int digitinput, int digitoutput, String ads, String ibutton, String params) {
+    public PackageData(String id, String date, String time, String lat, String lon, int speed, int course, int height, int sats, float hdop, int digitinput, int digitoutput, String ads, String ibutton, String params) {
         this.id = id;
         this.date = date;
         this.time = time;
