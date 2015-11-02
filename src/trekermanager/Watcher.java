@@ -28,6 +28,7 @@ public class Watcher implements Runnable {
                 if(Start.mf.getWatcherStatus(device)==false)
                 {
                     Start.mf.createListener(device);// если false - создаём listener с этим устройством
+                    
                 }
                 
             }
