@@ -10,7 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -122,8 +126,8 @@ public class ServerDb implements Constatnts {
         return rs;
     }
 
-   public int setDevice(Device dev){
-         sql = "INSERT INTO STreker "
+    public int setDevice(Device dev) {
+        sql = "INSERT INTO STreker "
                 + "(deviceId, port, password) "
                 + "VALUES ('" + dev.getId() + "'," + dev.getPort() + ",'" + dev.getPassword() + "')";//
         if (insertDb(sql) > 0) {
@@ -131,41 +135,82 @@ public class ServerDb implements Constatnts {
         } else {
             return Constatnts.ERROR;
         }
-   } 
-   
-   public ResultSet getSTreker(){
-       sql = "SELECT deviceId, port, password FROM STreker";
-       
-       return selectDb(sql);
-   }
-    
-    
-    public ArrayList<Device> getDeviceList(){
+    }
+
+    public ResultSet getSTreker() {
+        sql = "SELECT deviceId, port, password FROM STreker";
+        return selectDb(sql);
+    }
+
+    public ArrayList<Device> getDeviceList() {
         ArrayList<Device> deviceList = new ArrayList<Device>();
         Device device;
-         try {
+        try {
             sql = "SELECT deviceId, port, password FROM STreker";
-           ResultSet rs = selectDb(sql);
+            ResultSet rs = selectDb(sql);
             while (rs.next()) {
-                device = new Device(rs.getString(1), rs.getInt(2),rs.getString(3));
+                device = new Device(rs.getString(1), rs.getInt(2), rs.getString(3));
                 deviceList.add(device);
             }
             rs.close();
         } catch (SQLException ex) {
             System.out.println("ServerDb:getDeviceList():Ошибка подключения или создание Statement");
         }
+        return deviceList;
+    }
+
+    public void updDeviceTimeWork() {
+        //Дата последней записи по устройству
+        Date dtLast = null;
+        //Время начала последней работы
+        Time timeLastBegin = null;
+        //Время окончания последней работы
+        Time timeLastEnd = null;
         
-        
-        
-        return deviceList;    
+        for (Device dev : getDeviceList()) {
+//            dtLast = getDateDeviceLastWork(dev);
+//            timeLast = getTimeDeviceLastWork(dev,dtLast);
+        }
+    }
+
+    public Date getDateDeviceLastWork(Device dev) {
+        Date dtLast = null;
+        sql = "SELECT ISNULL(MAX(dtWork),'') AS dt FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "')";
+        ResultSet rs = selectDb(sql);
+        try {
+            while (rs.next()) {
+                    dtLast = rs.getDate(1);
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            System.out.println("ServerDb:getDateDeviceLastWork():Ошибка подключения или создание Statement");
+        }
+        return dtLast;
     }
     
+    public Time getTimeDeviceLastWork(Device dev, Date dtLast) {
+        Time timeLast = null;
+        sql = "SELECT ISNULL(MAX(timeEnd),ISNULL(MAX(timeEnd),'')) AS dt FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "') AND dtWork > = '" + dtLast + "'";
+        ResultSet rs = selectDb(sql);
+        try {
+            while (rs.next()) {
+                System.out.println("Видим выборку - " + rs.getTime(1));
+                    timeLast = rs.getTime(1);
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            System.out.println("ServerDb:getTimeDeviceLastWork():Ошибка подключения или создание Statement");
+        }
+        System.out.println("Видим переменную - " + timeLast);
+        return timeLast;
+    }
+
     public synchronized int setPackageData(PackageData pd) {
         System.out.println("pd.date=" + pd.date);
 
-        sql = "INSERT INTO PackageDate \n"
+        sql = "INSERT INTO PackageDate "
                 + "(deviceId,date, time, lat, lon, speed, course, height, sats, hdop, digitinput, digitouput, ads, ibutton, params, input2) \n"
-                + "VALUES ('" + pd.id + "','" + Methods.dateToString(pd.date) + "','" + Methods.timeToString(pd.time) + "','" + pd.lat + "','" + pd.lon + "','" + pd.speed + "','" + pd.course + "','" + pd.height + "','" + pd.sats + "','" + pd.hdop + "','" + pd.digitinput + "','" + pd.digitouput + "','" + pd.ads + "','" + pd.ibutton+ "','"+pd.params+ "','"+pd.input2 + "')";//
+                + "VALUES ('" + pd.id + "','" + Methods.dateToString(pd.date) + "','" + Methods.timeToString(pd.time) + "','" + pd.lat + "','" + pd.lon + "','" + pd.speed + "','" + pd.course + "','" + pd.height + "','" + pd.sats + "','" + pd.hdop + "','" + pd.digitinput + "','" + pd.digitouput + "','" + pd.ads + "','" + pd.ibutton + "','" + pd.params + "','" + pd.input2 + "')";//
         if (insertDb(sql) > 0) {
             return Constatnts.OK;
         } else {

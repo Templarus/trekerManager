@@ -38,6 +38,7 @@ public class MainForm extends javax.swing.JFrame {
         PanelScrolPane = new javax.swing.JScrollPane();
         AddButton = new javax.swing.JButton();
         butTrackerData = new javax.swing.JButton();
+        udpDeviceTimeWork = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(300, 400));
@@ -74,11 +75,22 @@ public class MainForm extends javax.swing.JFrame {
         PanelFont.add(butTrackerData);
         butTrackerData.setBounds(330, 20, 100, 23);
 
+        udpDeviceTimeWork.setText("jButton1");
+        udpDeviceTimeWork.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                udpDeviceTimeWorkActionPerformed(evt);
+            }
+        });
+        PanelFont.add(udpDeviceTimeWork);
+        udpDeviceTimeWork.setBounds(10, 20, 120, 23);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(PanelFont, javax.swing.GroupLayout.PREFERRED_SIZE, 520, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(PanelFont, javax.swing.GroupLayout.PREFERRED_SIZE, 520, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -146,6 +158,10 @@ public class MainForm extends javax.swing.JFrame {
         td.setVisible(true);
     }//GEN-LAST:event_butTrackerDataActionPerformed
 
+    private void udpDeviceTimeWorkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_udpDeviceTimeWorkActionPerformed
+        sdb.updDeviceTimeWork();
+    }//GEN-LAST:event_udpDeviceTimeWorkActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -179,7 +195,7 @@ public class MainForm extends javax.swing.JFrame {
     // собственно первый исполняемый метод - первичаная загрузка
     private boolean load() {
         System.out.println("MainForm:Load Started");
-        sdb = new ServerDb("jdbc:sqlserver://MAIN:1433;databaseName=UltraFiolet", "sa", "Zx3d2818!"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
+        sdb = new ServerDb("jdbc:sqlserver://AsusG46:1433;databaseName=UltraFiolet", "sa", "sa"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
 
         loadDBdata(); // чтение изначальной конфигурации - создание списка DeviceList
         drawPanels(); // отрисовка внешнего вида согласно прочитанной конфигурации
@@ -303,5 +319,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JPanel PanelFont;
     private javax.swing.JScrollPane PanelScrolPane;
     private javax.swing.JButton butTrackerData;
+    private javax.swing.JButton udpDeviceTimeWork;
     // End of variables declaration//GEN-END:variables
 }
