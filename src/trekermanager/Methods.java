@@ -13,7 +13,7 @@ public class Methods {
             String month = data.substring(2, 4);
             String year = data.substring(4, 6);
             StringBuilder stringDate = new StringBuilder();
-            stringDate.append(year).append(month).append(day);
+            stringDate.append("20").append(year).append(month).append(day);
             return stringDate.toString();
         } else {
             return "";

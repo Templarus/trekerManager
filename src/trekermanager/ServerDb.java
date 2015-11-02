@@ -161,11 +161,11 @@ public class ServerDb implements Constatnts {
     }
     
     public synchronized int setPackageData(PackageData pd) {
-        System.out.println("pd.date=" + pd.date);
-
+       
         sql = "INSERT INTO PackageDate \n"
                 + "(deviceId,date, time, lat, lon, speed, course, height, sats, hdop, digitinput, digitouput, ads, ibutton, params, input2) \n"
                 + "VALUES ('" + pd.id + "','" + Methods.dateToString(pd.date) + "','" + Methods.timeToString(pd.time) + "','" + pd.lat + "','" + pd.lon + "','" + pd.speed + "','" + pd.course + "','" + pd.height + "','" + pd.sats + "','" + pd.hdop + "','" + pd.digitinput + "','" + pd.digitouput + "','" + pd.ads + "','" + pd.ibutton+ "','"+pd.params+ "','"+pd.input2 + "')";
+        
         if (insertDb(sql) > 0) {
             return Constatnts.OK;
         } else {
