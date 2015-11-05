@@ -15,7 +15,16 @@ public class DeviceListener implements Runnable {
     private ServerSocket serverSocket;
     private Device device;
     private Socket cs;
+    InputStream in;
+    OutputStream out;
+    int length = 0;
+    byte[] incoming;
+
     private boolean status = true;  // статус соединения\открытого ClientSocker
+    private long time1;
+    private long time2;
+    private int timeLimit = 10000;
+    boolean switcher = true;
 
     public DeviceListener() {
         this(new Device()); // пустой конструктор Device вернёт элемент с стандартными данными
@@ -30,51 +39,75 @@ public class DeviceListener implements Runnable {
             serverSocket = new ServerSocket(device.getPort());
             Socket clientSocket = new Socket();
             clientSocket = serverSocket.accept();
+
             status = Start.mf.getWatcherStatus(device); // в локальную переменную записываем значение из MainForm - изначально оно = true
             while (status) {
                 if (!clientSocket.isClosed()) { // подлежит доработке для адекватной отработки кода
                     Start.mf.setWatcherStatus(device, true); // логическое дублирование, если сокет запущен вторично. вероятно бесполезно
                     Start.mf.deviceConnection(device.getId(), true); // если .accept прошёл - TCP соединение установлено
-                    InputStream in = clientSocket.getInputStream();
-                    OutputStream out = clientSocket.getOutputStream();
-                    byte[] incoming = new byte[256];
-                    int length = in.read(incoming);
-                    System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
-                    String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
-                    if (reply.equals("empty")) { //если вернулось empty - устройство разорвало соединение со своей стороны.
-                        cs.close();
-                        Start.mf.setWatcherStatus(device, false); // соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
+                    in = clientSocket.getInputStream();
+                    out = clientSocket.getOutputStream();
+                    incoming = new byte[256];
 
+                    timeDiffCalc();
+
+                    System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
+
+                    String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
+
+                    if (reply.equals("empty")) { //если вернулось empty - устройство разорвало соединение со своей стороны.
+                        in.close();
+                        out.close();
+                        //cs.close();
+                        serverSocket.close();
+                        Start.mf.setWatcherStatus(device, false); // соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
+                        Start.mf.deviceConnection(device.getId(), false);
+                        Start.mf.deviceStatus(device.getId(), false);
                     } else {
+
                         out.write(reply.getBytes());
+
                         System.out.println("DeviceListener: getPacket executed");
                     }
-                } else {
-                    Start.mf.deviceConnection(device.getId(), false);
                 }
                 status = Start.mf.getWatcherStatus(device); // т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
             }
         } catch (IOException ex) {
-            Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                in.close();
+                out.close();
+                cs.close();
+                serverSocket.close();
+                Start.mf.deviceConnection(device.getId(), false);
+                                System.err.println("IOException in listener " + device.getId() + " : " + ex.getMessage());
+
+            } catch (IOException ex1) {
+                                System.err.println("IOException in listener " + device.getId() + " : " + ex1.getMessage());
+
+            }
         }
     }
 
     private String makeAnswer(byte[] data) {
         String message[] = new String(data).trim().split("#");
-        System.out.println("Message. mess[0]=" + message[0] + "mess length=" + message.length);
-        if (message.length > 1) {
-            switch (message[1]) {
+        System.out.println("Message. mess[0]=" + message[0] + "  mess length=" + message.length);
+        if (message.length > 0) {
+            switch (message[0]) {
                 case "L":
+                    System.err.println("1");
                     return "#AL#1\r\n";
 
                 case "D": // пакет с данными - требуется его разборка, вызывается метод getData, в котором происходит создание элемента класса PackageData( абстр Pack)
-                    getData(message[2]);
+                    System.err.println("2");
+                    getData(message[1]);
                     return "#AD#1\r\n";
 
                 case "P":
+                    System.err.println("3");
                     return "#AP#\r\n";
             }
         }
+        System.err.println("4");
         return "empty";
 
     }
@@ -132,6 +165,24 @@ public class DeviceListener implements Runnable {
         System.out.println("DeviceListener: getData executed");
 
         return D;
+    }
+
+    private void timeDiffCalc() {
+        try {
+            if (in.read() != -1) {
+                time1 = System.currentTimeMillis();
+                length = in.read(incoming);
+                System.err.println("time1=" + time1);
+            } else {
+                time2 = System.currentTimeMillis();
+                System.err.println("time2=" + time2);
+            }
+            if (time2 - time1 > timeLimit) {
+                System.err.println("TIMELIMIT OVERLAPTED");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
