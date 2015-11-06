@@ -163,95 +163,178 @@ public class ServerDb implements Constatnts {
     public void updDeviceTimeWork() {
 
         for (Device dev : getDeviceList()) {
+            //Получаем данные по последней работе
+            Date dtLastW = new Date(-2208978000000L);
+            Time timeLastW = new Time(-10800000l);
+            DeviceTimeWork devLastWork = getDeviceTimeWorkLast(dev);
+            Date dtLast = new Date(-2208978000000L);
+            Time timeLast = new Time(-10800000l);
 
-            if (getDeviceTimeWorkLast(dev).getDeviceId().equals("")) {
+//            if (!devLastWork.getDeviceId().equals("")) {
+//                dtLast = devLastWork.getDtWork();
+//                timeLast = devLastWork.getTimeEnd();
+//            };
 
                 try {
-                    System.out.println("Проверка записи по устройству" + "\"" + dev.getId() + "\"");
-
-                    //Проверяем есть ли данные по работе устройства в таблице PackageDate
-                    sql = "SELECT COUNT(*) AS Count FROM PackageDate WHERE (deviceId = N'" + dev.getId() + "')";
-                    ResultSet rs = selectDb(sql);
-                    int count = 0;
+                    sql = "SELECT    TOP(1)    deviceId, ISNULL(dtWork,''), timeBegin, ISNULL(timeEnd,ISNULL(timeBegin,'')) FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "') ORDER BY dtWork DESC, timeBegin DESC, timeEnd DESC";
+                    rs = selectDb(sql);
+                    System.out.println("ДАТА ЗАВЕРШЕНИЯ" + sql);
                     while (rs.next()) {
-                        count = rs.getInt(1);
-                    }
-                    if (count == 0) {
-                        System.out.println("Нет записи по устройсту - " + "\"" + dev.getId() + "\"");
-                        continue;
-                    } else {
-                        for(int i = 0; i < count; i++){
-                        Date dtLast = new Date(-2208988800000L - 9000000L - 1800000L);
-                        setDeviceWorkTime(dev, dtLast);
-                        }
+                        dtLast = rs.getDate(2);
+                        timeLast = rs.getTime(4);
                     }
                 } catch (SQLException ex) {
-                    Logger.getLogger(ServerDb.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println("ServerDb:updDeviceTimeWork()ПолучениеДатфЗавершения:Ошибка подключения или создание Statement");
                 }
-            };
 
+
+            while (hasNextTimeWork(dev, dtLast, timeLast) > 0) {
+
+                //if (dtLast.equals(dtLastW) | timeLast.equals(timeLastW)) {
+                try {
+                    sql = "SELECT  TOP(1)  date, time FROM PackageDate WHERE (ISNULL(input2,0) = 1) AND deviceId = '" + dev.getId() + "' AND date > = '" + dtLast + "' AND time > '" + timeLast.toString() + "' ORDER BY date, time";
+                    rs = selectDb(sql);
+                    System.out.println("Получение данных по последней дате работы" + sql);
+                    while (rs.next()) {
+                        dtLast = rs.getDate(1);
+                        timeLast = rs.getTime(2);
+                    }
+                } catch (SQLException ex) {
+                    System.out.println("ServerDb:updDeviceTimeWork()ПолучениеДанныхПоПоследнейРаботе:Ошибка подключения или создание Statement");
+                }
+
+//                if (timeLast.toString().equals("00:00:00")) {
+//                    sql = "INSERT INTO DeviceTimeWork "
+//                            + "      (deviceId, dtWork, timeBegin) "
+//                            + "VALUES('" + dev.getId() + "','" + dtLast.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '00:00:00' AND date = '" + dtLast.toString() + "' ORDER BY time))";
+//
+//                    System.out.println("SQL3:" + sql);
+//                } else {
+                    sql = "INSERT INTO DeviceTimeWork "
+                            + "      (deviceId, dtWork, timeBegin) "
+                            + "VALUES('" + dev.getId() + "','" + dtLast.toString() + "','" + timeLast.toString() + "')";
+                     //+ "VALUES('" + dev.getId() + "','" + dtLast.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '" + timeLast.toString() + "' AND date = '" + dtLast.toString() + "' ORDER BY time))";
+                    System.out.println("SQL43:" + sql);
+                //};
+                updateDb(sql);
+
+                sql = "UPDATE DeviceTimeWork "
+                        + "SET timeEnd = "
+                        + "ISNULL("
+                        + "(SELECT TOP(1) time FROM PackageDate WHERE deviceId = '" + dev.getId() + "' AND (date = '" + dtLast + "') AND (time >= '" + timeLast + "') and ISNULL(input2,0) = 0 ORDER BY time),"
+                        + "'23:59:59') "
+                        + "WHERE  deviceId = '" + dev.getId() + "' ANd dtWork = '" + dtLast + "' And timeBegin = '" + timeLast + "'";
+                System.out.println("setDeviceTimeWorkEnd - SQL : " + sql);
+                if (updateDb(sql) > 0) {
+                    //System.out.println("Обновлено удачно!");
+
+                };
+                //devLastWork = getDeviceTimeWorkLast(dev);
+                try {
+                    sql = "SELECT    TOP(1)    deviceId, dtWork, timeBegin, ISNULL(timeEnd,'') FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "') ORDER BY dtWork DESC, timeBegin DESC, timeEnd DESC";
+                    rs = selectDb(sql);
+                    System.out.println("ДАТА ЗАВЕРШЕНИЯ" + sql);
+                    while (rs.next()) {
+                        dtLast = rs.getDate(2);
+                        timeLast = rs.getTime(4);
+                    }
+                } catch (SQLException ex) {
+                    System.out.println("ServerDb:updDeviceTimeWork()ПолучениеДатфЗавершения:Ошибка подключения или создание Statement");
+                }
+
+                // }
+//                devLastWork = getDeviceTimeWorkLast(dev);
+//                if (!devLastWork.getDeviceId().equals("")) {
+//                    dtLast = devLastWork.getDtWork();
+//                    timeLast = devLastWork.getTimeEnd();
+//                };
+            }
+
+//            if (getDeviceTimeWorkLast(dev).getDeviceId().equals("")) {
+//                try {
+//                    System.out.println("Проверка записи по устройству" + "\"" + dev.getId() + "\"");
+//
+//                    //Проверяем есть ли данные по работе устройства в таблице PackageDate
+//                    sql = "SELECT COUNT(*) AS Count FROM PackageDate WHERE (deviceId = N'" + dev.getId() + "')";
+//                    ResultSet rs = selectDb(sql);
+//                    int count = 0;
+//                    while (rs.next()) {
+//                        count = rs.getInt(1);
+//                    }
+//                    if (count == 0) {
+//                        System.out.println("Нет записи по устройсту - " + "\"" + dev.getId() + "\"");
+//                        continue;
+//                    } else {
+//                        for(int i = 0; i < count; i++){
+//                        Date dtLast = new Date(-2208988800000L - 9000000L - 1800000L);
+//                        setDeviceWorkTime(dev, dtLast);
+//                        }
+//                    }
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(ServerDb.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            };
             System.out.println("Закончили формирования работы...");
 
         }
     }
 
-    private void setDeviceWorkTime(Device dev, Date dtLast) {
-        Time t = new Time(-10800000l);
-        sql = "SELECT date FROM PackageDate WHERE (ISNULL(input2, 0) = 1) AND (deviceId = N'" + dev.getId() + "') AND date > '" + dtLast + "' GROUP BY date ORDER BY date";
-        System.out.println("setDeviceWorkTime  - SQL : " + sql);
-        rs = selectDb(sql);
+    private void setDeviceWorkTime(Device dev, Date dtLast, DeviceTimeWork devLastWork, Time timeLast) {
+//        Time t = new Time(-10800000l);
+//        sql = "SELECT date FROM PackageDate WHERE (ISNULL(input2, 0) = 1) AND (deviceId = N'" + dev.getId() + "') AND date > '" + dtLast + "' GROUP BY date ORDER BY date";
+//        System.out.println("setDeviceWorkTime  - SQL : " + sql);
+//        rs = selectDb(sql);
 
-        try {
-            while (rs.next()) {
-                Date dt = rs.getDate(1);
-                while (hasNextTimeWork(dev, dt) > 0) {
-                    System.out.println("Мы зашли в блок проверки времени");
-                    DeviceTimeWork devLastWork = getDeviceTimeWorkLast(dev);
-                    System.out.println("devLastWork - " + devLastWork.getDeviceId());
-                   
-                    if (devLastWork.getDeviceId().equals("")) {
-                        sql = "INSERT INTO DeviceTimeWork "
-                                + "      (deviceId, dtWork, timeBegin) "
-                                + "VALUES('" + dev.getId() + "','" + dt.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '00:00:00' AND date = '" + dt.toString() + "' ORDER BY time))";
-                        
-                        System.out.println("SQL3:" + sql);
-                    } else {
-                                            sql = "INSERT INTO DeviceTimeWork "
-                                + "      (deviceId, dtWork, timeBegin) "
-                                + "VALUES('" + dev.getId() + "','" + dt.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '" + devLastWork.getTimeEnd().toString() + "' AND date = '" + dt.toString() + "' ORDER BY time))";    
+        //try {
+//            while (rs.next()) {
+//                Date dt = rs.getDate(1);
+//                while (hasNextTimeWork(dev, dt) > 0) {
+//                    System.out.println("Мы зашли в блок проверки времени");
+//                    DeviceTimeWork devLastWork = getDeviceTimeWorkLast(dev);
+//                    System.out.println("devLastWork - " + devLastWork.getDeviceId());
+        if (devLastWork.getDeviceId().equals("")) {
+            sql = "INSERT INTO DeviceTimeWork "
+                    + "      (deviceId, dtWork, timeBegin) "
+                    + "VALUES('" + dev.getId() + "','" + dtLast.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '00:00:00' AND date = '" + dtLast.toString() + "' ORDER BY time))";
 
-                     System.out.println("SQL4:" + sql);
-                    };
-                    
-                    System.out.println("SQL2:" + sql);
-                    updateDb(sql);
-                }
-            }
+            System.out.println("SQL3:" + sql);
+        } else {
+            sql = "INSERT INTO DeviceTimeWork "
+                    + "      (deviceId, dtWork, timeBegin) "
+                    + "VALUES('" + dev.getId() + "','" + dtLast.toString() + "',(SELECT TOP(1) time FROM PackageDate WHERE ISNULL(input2,0) = 1 AND deviceId = '" + dev.getId() + "' AND time > '" + timeLast.toString() + "' AND date = '" + dtLast.toString() + "' ORDER BY time))";
 
-        } catch (SQLException ex) {
-            System.out.println("ServerDb:setDeviceWorkTime():Ошибка подключения или создание Statement");
-        }
+            //System.out.println("SQL4:" + sql);
+        };
+
+        //System.out.println("SQL2:" + sql);
+        updateDb(sql);
+        // }
+//            }
+//
+//        } catch (SQLException ex) {
+//            System.out.println("ServerDb:setDeviceWorkTime():Ошибка подключения или создание Statement");
+//        }
 
     }
 
-    private int hasNextTimeWork(Device dev, Date dt) {
-        Time timeLast = new Time(-10800000l);
-        //DeviceTimeWork devLastWork = getDeviceTimeWorkLast(dev);
-
-        sql = "SELECT TOP(1)  timeEnd FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "') ORDER BY dtWork DESC, timeBegin DESC, timeEnd DESC";
-       // System.out.println("hasNextTimeWork - SQL : " + sql);
-        rs = selectDb(sql);
-        try {
-            while (rs.next()) {
-                timeLast = rs.getTime(1);
-            }
-        } catch (SQLException ex) {
-            System.out.println("ServerDb:hasNextTimeWork()ОшибкаПолученияПоследнегоВремяРаботы:Ошибка подключения или создание Statement");
-        }
-
-        System.out.println("devLastWork.getTimeEnd() : " + timeLast);
+    private int hasNextTimeWork(Device dev, Date dtLast, Time timeLast) {
+//        Time timeLast = new Time(-10800000l);
+//        //DeviceTimeWork devLastWork = getDeviceTimeWorkLast(dev);
+//
+//        sql = "SELECT TOP(1)  timeEnd FROM DeviceTimeWork WHERE (deviceId = N'" + dev.getId() + "') ORDER BY dtWork DESC, timeBegin DESC, timeEnd DESC";
+//       // System.out.println("hasNextTimeWork - SQL : " + sql);
+//        rs = selectDb(sql);
+//        try {
+//            while (rs.next()) {
+//                timeLast = rs.getTime(1);
+//            }
+//        } catch (SQLException ex) {
+//            System.out.println("ServerDb:hasNextTimeWork()ОшибкаПолученияПоследнегоВремяРаботы:Ошибка подключения или создание Statement");
+//        }
+//
+//        System.out.println("devLastWork.getTimeEnd() : " + timeLast);
         int countRecord = 0;
-        sql = "SELECT COUNT(*) AS Count FROM PackageDate WHERE (deviceId = '" + dev.getId() + "' ) AND  (date = '" + dt.toString() + "') AND (time > '" + timeLast + "') AND (ISNULL(input2,0) = 1)";
+        sql = "SELECT COUNT(*) AS Count FROM PackageDate WHERE (deviceId = '" + dev.getId() + "' ) AND  (date > '" + dtLast.toString() + "') AND (time > '" + timeLast + "') AND (ISNULL(input2,0) = 1)";
         System.out.println("hasNextTimeWork - SQL : " + sql);
         rs = selectDb(sql);
         try {
@@ -268,7 +351,7 @@ public class ServerDb implements Constatnts {
 
     public DeviceTimeWork getDeviceTimeWorkLast(Device dev) {
         DeviceTimeWork devLastWork = new DeviceTimeWork("", new Date(-2208988800000L), new Time(-10800000l), new Time(-10800000l));
-        sql = "SELECT TOP (1) deviceId, dtWork, timeBegin, ISNULL(timeEnd,'') FROM UltraFiolet.dbo.DeviceTimeWork WHERE (deviceId = " + dev.getId() + ") ORDER BY dtWork DESC, timeEnd DESC, timeBegin DESC";
+        sql = "SELECT TOP (1) deviceId, dtWork, timeBegin, ISNULL(timeEnd,'') FROM UltraFiolet.dbo.DeviceTimeWork WHERE (deviceId = '" + dev.getId() + "') ORDER BY dtWork DESC, timeEnd DESC, timeBegin DESC";
         System.out.println("getDeviceTimeWorkLast - SQL:" + sql);
         rs = selectDb(sql);
         try {
