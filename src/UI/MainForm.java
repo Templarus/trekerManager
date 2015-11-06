@@ -181,8 +181,9 @@ public class MainForm extends javax.swing.JFrame {
     // собственно первый исполняемый метод - первичаная загрузка
     private boolean load() {
         System.out.println("MainForm:Load Started");
-        sdb = new ServerDb("jdbc:sqlserver://AsusG46:1433;databaseName=UltraFiolet", "sa", "sa"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
 
+        sdb = new ServerDb("jdbc:sqlserver://Main:1433;databaseName=UltraFiolet", "sa", "Zx3d2818!"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
+      //  sdb = new ServerDb("jdbc:sqlserver://AsusG46:1433;databaseName=UltraFiolet", "sa", "sa"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
         loadDBdata(); // чтение изначальной конфигурации - создание списка DeviceList
         drawPanels(); // отрисовка внешнего вида согласно прочитанной конфигурации
         createWatcher(); // создание наблюдателей для каждого устройства (созданного listener)
