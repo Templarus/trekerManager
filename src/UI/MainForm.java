@@ -19,7 +19,7 @@ public class MainForm extends javax.swing.JFrame {
     private Map WatcherList = new HashMap<Device, Boolean>(); // содержит статусы DeviceListener для каждого устройства, ключ = указатель на устройство
     public static FormDeviceParams FDP; // popup для добавления нового устройства в пул "на лету"
 
-    public ServerDb sdb;
+    public static ServerDb sdb;
     private javax.swing.JPanel PanelPane;
 
     public MainForm() {
@@ -38,7 +38,6 @@ public class MainForm extends javax.swing.JFrame {
         PanelScrolPane = new javax.swing.JScrollPane();
         AddButton = new javax.swing.JButton();
         butTrackerData = new javax.swing.JButton();
-        udpDeviceTimeWork = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(300, 400));
@@ -74,15 +73,6 @@ public class MainForm extends javax.swing.JFrame {
         });
         PanelFont.add(butTrackerData);
         butTrackerData.setBounds(330, 20, 100, 23);
-
-        udpDeviceTimeWork.setText("jButton1");
-        udpDeviceTimeWork.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                udpDeviceTimeWorkActionPerformed(evt);
-            }
-        });
-        PanelFont.add(udpDeviceTimeWork);
-        udpDeviceTimeWork.setBounds(10, 20, 120, 23);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -157,10 +147,6 @@ public class MainForm extends javax.swing.JFrame {
         TrekerData td = new TrekerData();
         td.setVisible(true);
     }//GEN-LAST:event_butTrackerDataActionPerformed
-
-    private void udpDeviceTimeWorkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_udpDeviceTimeWorkActionPerformed
-        sdb.updDeviceTimeWork();
-    }//GEN-LAST:event_udpDeviceTimeWorkActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -321,6 +307,5 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JPanel PanelFont;
     private javax.swing.JScrollPane PanelScrolPane;
     private javax.swing.JButton butTrackerData;
-    private javax.swing.JButton udpDeviceTimeWork;
     // End of variables declaration//GEN-END:variables
 }
