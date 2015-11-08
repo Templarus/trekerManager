@@ -140,7 +140,7 @@ public class ServerDb implements Constatnts {
     }
 
     public ResultSet getSTreker() {
-        sql = "SELECT deviceId, port, password FROM STreker ORDER BY deviceId DESC";
+        sql = "SELECT deviceId as Устройство, port as Порт, password as Пароль FROM STreker ORDER BY deviceId DESC";
         return selectDb(sql);
     }
 
@@ -185,7 +185,7 @@ public class ServerDb implements Constatnts {
         }
         
         
-        sql = "SELECT deviceId AS Устройство, dtWork AS Дата, timeBegin as [Время начало работы], timeEnd as [Время окончания работы], timeWorkin  AS [Время отработанное(мин)] FROM DeviceTimeWork WHERE deviceId = N'" + deviceId + "' AND dtWork = '" + dtFirst.toString() +  "' ORDER BY timeBegin";
+        sql = "SELECT deviceId AS Устройство, dtWork AS Дата, CONVERT(nvarchar(8),timeBegin) as [Время начала работы], CONVERT(nvarchar(8),timeEnd) as [Время окончания работы], timeWorkin  AS [Время отработанное(мин)] FROM DeviceTimeWork WHERE deviceId = N'" + deviceId + "' AND dtWork = '" + dtFirst.toString() +  "' ORDER BY timeBegin";
         System.out.println("");
         return selectDb(sql);
     }
