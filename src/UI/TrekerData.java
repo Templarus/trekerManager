@@ -5,6 +5,8 @@
  */
 package UI;
 
+import java.sql.Date;
+
 /**
  *
  * @author RusTe
@@ -20,6 +22,7 @@ public class TrekerData extends javax.swing.JFrame {
      */
     public TrekerData() {
         initComponents();
+        
         try {
             dbm.setDataSource(Start.mf.sdb.getSTreker());
         } catch (Exception ex) {
@@ -35,7 +38,9 @@ public class TrekerData extends javax.swing.JFrame {
         } catch (Exception ex) {
             System.out.println("Создание таблицы отработано времени по дням расшифровка ошибка доступа к RS" + ex);
         }
-
+        sTreker.setRowSelectionInterval(0,0);
+        DeviceTimeWorkForDay.setRowSelectionInterval(0,0);
+    
     }
 
     /**
@@ -53,7 +58,7 @@ public class TrekerData extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        DeviceTimeWorkForDay = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -64,14 +69,30 @@ public class TrekerData extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jLabel1.setText("Информация по трекерам");
 
+        sTreker.setAutoCreateRowSorter(true);
         sTreker.setModel(dbm);
+        sTreker.setToolTipText("");
+        sTreker.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        sTreker.setFocusable(false);
+        sTreker.getTableHeader().setReorderingAllowed(false);
+        sTreker.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                sTrekerMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(sTreker);
+        sTreker.getTableHeader().setReorderingAllowed(false);
 
         jTable1.setModel(dbmDeviceTimeWorkExtend);
         jScrollPane2.setViewportView(jTable1);
 
-        jTable2.setModel(dbmDeviceTimeWork);
-        jScrollPane3.setViewportView(jTable2);
+        DeviceTimeWorkForDay.setModel(dbmDeviceTimeWork);
+        DeviceTimeWorkForDay.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DeviceTimeWorkForDayMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(DeviceTimeWorkForDay);
 
         jLabel2.setText("Время работы по дням");
 
@@ -141,6 +162,38 @@ public class TrekerData extends javax.swing.JFrame {
         MainForm.sdb.updDeviceTimeWork();
     }//GEN-LAST:event_butRaschetActionPerformed
 
+    private void sTrekerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sTrekerMouseClicked
+        Date dtFirst = new Date(-2208978000000L);
+        String deviceId = (String)sTreker.getValueAt(sTreker.getSelectedRow(), 0);
+        String sql = "SELECT deviceId AS Устройство, dtWork AS Дата, SUM(timeWorkin) AS [Время отработанное(мин)] FROM DeviceTimeWork GROUP BY deviceId, dtWork HAVING (deviceId = N'" + deviceId + "') ORDER BY Дата";
+        try {
+            dbmDeviceTimeWork.setDataSource(Start.mf.sdb.selectDb(sql));
+        } catch (Exception ex) {
+            System.out.println("Переход между записями в талице спр трекеров ошибка доступа к RS" + ex);
+        }
+        if(DeviceTimeWorkForDay.getRowCount() > 0){
+        DeviceTimeWorkForDay.setRowSelectionInterval(0,0);
+        dtFirst = (Date)DeviceTimeWorkForDay.getValueAt(DeviceTimeWorkForDay.getSelectedRow(), 1);
+        }
+         sql = "SELECT deviceId AS Устройство, dtWork AS Дата, timeBegin as [Время начало работы], timeEnd as [Время окончания работы], timeWorkin  AS [Время отработанное(мин)] FROM DeviceTimeWork WHERE deviceId = N'" + deviceId + "' AND dtWork = '" + dtFirst.toString() +  "' ORDER BY timeBegin";
+        try {
+            dbmDeviceTimeWorkExtend.setDataSource(Start.mf.sdb.selectDb(sql));
+        } catch (Exception ex) {
+            System.out.println("Переход между записями в талице спр трекеров ошибка доступа к RS -обвноыление таблицы расшифровки" + ex);
+        }
+    }//GEN-LAST:event_sTrekerMouseClicked
+
+    private void DeviceTimeWorkForDayMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DeviceTimeWorkForDayMouseClicked
+        Date dtFirst = (Date)DeviceTimeWorkForDay.getValueAt(DeviceTimeWorkForDay.getSelectedRow(), 1);
+        String deviceId = (String)sTreker.getValueAt(sTreker.getSelectedRow(), 0);
+        String sql = "SELECT deviceId AS Устройство, dtWork AS Дата, timeBegin as [Время начало работы], timeEnd as [Время окончания работы], timeWorkin  AS [Время отработанное(мин)] FROM DeviceTimeWork WHERE deviceId = N'" + deviceId + "' AND dtWork = '" + dtFirst.toString() +  "' ORDER BY timeBegin";
+        try {
+            dbmDeviceTimeWorkExtend.setDataSource(Start.mf.sdb.selectDb(sql));
+        } catch (Exception ex) {
+            System.out.println("Переход между записями в талице время работы устройства ошибка доступа к RS -обвноыление таблицы расшифровки" + ex);
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_DeviceTimeWorkForDayMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -177,6 +230,7 @@ public class TrekerData extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable DeviceTimeWorkForDay;
     private javax.swing.JButton butRaschet;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -186,7 +240,6 @@ public class TrekerData extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTable sTreker;
     // End of variables declaration//GEN-END:variables
 }
