@@ -45,9 +45,9 @@ public class EventLogger {
         Event event;
         int num=eventLog.size();
         if(incId>=0) //для устройства - нужно записать в deviceId евента = его id
-        {event=new Event(num,type,incId);}
+        {event=new Event(num,severity,type,incId);}
         if(incId<0) // для всех остальных источников событий = -1 и конструктор другой
-        {event=new Event(num,type);}
+        {event=new Event(num,severity,type);}
         
         
         return event=new Event();
