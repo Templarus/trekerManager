@@ -114,7 +114,7 @@ public class DeviceListener implements Runnable {
 // разборка пакета с данными на собственно данные
 
     private Pack getData(String message) {
-
+//D#020100;030350;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;000000000000;IDX:1:108,MCC:1:250,MNC:1:1,LAC:1:407,CID:1:56625,Vext:1:5977,IN1:1:0,IN2:1:0
         String body[] = message.split(";");
         String date = "";
         String time = "";
