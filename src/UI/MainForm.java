@@ -17,6 +17,7 @@ public class MainForm extends javax.swing.JFrame {
     private Map DeviceList = new HashMap<String, Device>();  //содержит "список устройств", ключ = id устройства
     private Map PanelDeviceList = new HashMap<String, PanelDevice>(); //содержит "список панелей" для отображения статуса устройств, ключ = id устройства
     private Map WatcherList = new HashMap<Device, Boolean>(); // содержит статусы DeviceListener для каждого устройства, ключ = указатель на устройство
+    private Map timeMap = new HashMap<Device, Long>();// содержит тайминги последнего пакета для каждого устройства
     public static FormDeviceParams FDP; // popup для добавления нового устройства в пул "на лету"
 
     public static ServerDb sdb;
@@ -122,6 +123,14 @@ public class MainForm extends javax.swing.JFrame {
         return DeviceList;
     }
 
+    public Map getTimeMap() {
+        return timeMap;
+    }
+
+    public void setTime(Device device, Long time) {
+        timeMap.put(device, time);
+    }
+    
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
         System.out.println("MainForm: AddButtonActionPerformed clicked");
         Point mloc = MouseInfo.getPointerInfo().getLocation();
@@ -182,7 +191,7 @@ public class MainForm extends javax.swing.JFrame {
     private boolean load() {
         System.out.println("MainForm:Load Started");
 
-      //  sdb = new ServerDb("jdbc:sqlserver://ASUSG46:1433;databaseName=UltraFiolet", "sa", "sa"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
+        //  sdb = new ServerDb("jdbc:sqlserver://ASUSG46:1433;databaseName=UltraFiolet", "sa", "sa"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
         sdb = new ServerDb("jdbc:sqlserver://MAIN:1433;databaseName=UltraFiolet", "sa", "Zx3d2818!"); // создаём объект ServerDB и собственно устанавливаем коннект к базе
         loadDBdata(); // чтение изначальной конфигурации - создание списка DeviceList
         drawPanels(); // отрисовка внешнего вида согласно прочитанной конфигурации
@@ -281,7 +290,7 @@ public class MainForm extends javax.swing.JFrame {
     public void deviceConnection(String id, boolean connection) {
         Device device = (Device) Start.mf.DeviceList.get(id);
         device.setConnection(connection);
-        System.out.println("MainForm: deviceConnection " + device.getId() + " executed=" + connection);
+        System.out.println("MainForm: deviceConnection() Device " + device.getId() + " connection=" + connection);
         PanelDevice pd = (PanelDevice) PanelDeviceList.get(device.getId());
         pd.redrawPanel(); // метод перерисовки панели (изменение цвета индикатора)
     }
@@ -290,13 +299,14 @@ public class MainForm extends javax.swing.JFrame {
     public void deviceStatus(String id, boolean status) {
         Device device = (Device) DeviceList.get(id);
         device.setStatus(status);
-        System.out.println("MainForm: deviceStatus" + device.getId() + "executed=" + status);
+        System.out.println("MainForm: deviceStatus() Device " + device.getId() + " Status=" + status);
     }
 
 // метод, в используемый для создания Listener для каждого устройства
     public void createListener(Device device) {
         DeviceListener DL = new DeviceListener(device);
         WatcherList.put(device, true); // добавляем в список для наблюдения 
+        timeMap.put(device, System.currentTimeMillis());
         Thread t1 = new Thread(DL);
         t1.start();
         System.out.println("MainForm: createListener executed");

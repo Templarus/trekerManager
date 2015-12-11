@@ -120,7 +120,6 @@ public class PackageData extends Pack {
 //        String In2[] = paramsbody[7].split(":");
 //        this.input2 = Integer.parseInt(In2[2]) == 1;
 
-        System.out.println("Integer.parseInt(In2[2]) ==" + this.input2);
         System.out.println("this.idx="+this.idx+ " this.mcc="+this.mcc+ " this.mnc"+this.mnc+" this.lac="+this.lac+" this.cid="+this.cid+" this.vext="+this.vext+" this.input1="+this.input1+" this.input2="+this.input1);
         SaveToDB();
     }
@@ -133,7 +132,7 @@ public class PackageData extends Pack {
 // input2 - boolean отображение дискретного сигнала(0,1) с устройства.
 
     @Override
-    public void SaveToDB() {
+    public final void SaveToDB() {
         System.out.println("PackageData: SaveToDB executed");
         if (this.input2) {
             Start.mf.deviceStatus(this.id, true);
