@@ -9,7 +9,8 @@ import java.util.Set;
 import javax.swing.JScrollPane;
 import trekermanager.Device;
 import trekermanager.DeviceListener;
-import trekermanager.ServerDb;
+import Db.ServerDb;
+import java.net.ServerSocket;
 import trekermanager.Watcher;
 
 public class MainForm extends javax.swing.JFrame {
@@ -18,6 +19,7 @@ public class MainForm extends javax.swing.JFrame {
     private Map PanelDeviceList = new HashMap<String, PanelDevice>(); //содержит "список панелей" для отображения статуса устройств, ключ = id устройства
     private Map WatcherList = new HashMap<Device, Boolean>(); // содержит статусы DeviceListener для каждого устройства, ключ = указатель на устройство
     private Map timeMap = new HashMap<Device, Long>();// содержит тайминги последнего пакета для каждого устройства
+    private Map socketMap = new HashMap<Device, ServerSocket>();
     public static FormDeviceParams FDP; // popup для добавления нового устройства в пул "на лету"
 
     public static ServerDb sdb;
@@ -127,10 +129,22 @@ public class MainForm extends javax.swing.JFrame {
         return timeMap;
     }
 
+    public ServerSocket getSocket(Device d) {
+
+        return (ServerSocket) socketMap.get(d);
+
+    }
+
+    public void setSocket(Device d, ServerSocket serversocket) {
+
+        socketMap.put(d, serversocket);
+
+    }
+
     public void setTime(Device device, Long time) {
         timeMap.put(device, time);
     }
-    
+
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
         System.out.println("MainForm: AddButtonActionPerformed clicked");
         Point mloc = MouseInfo.getPointerInfo().getLocation();
@@ -187,7 +201,7 @@ public class MainForm extends javax.swing.JFrame {
         });
     }
 
-    // собственно первый исполняемый метод - первичаная загрузка
+// собственно первый исполняемый метод - первичаная загрузка
     private boolean load() {
         System.out.println("MainForm:Load Started");
 
@@ -207,7 +221,7 @@ public class MainForm extends javax.swing.JFrame {
 
     }
 
-    // метод динамического создания вложенного в PanelScrolPane(элемент с полосой прокрутки) элемента Jpanel - в нём отображается набор элементов PanelDevice
+// метод динамического создания вложенного в PanelScrolPane(элемент с полосой прокрутки) элемента Jpanel - в нём отображается набор элементов PanelDevice
     private void createPanelPane() {
         PanelPane = new javax.swing.JPanel(); // вложенная вJpanel
         PanelPane.setPreferredSize(new java.awt.Dimension(418, 228));
@@ -266,7 +280,7 @@ public class MainForm extends javax.swing.JFrame {
         System.out.println("MainForm: reload executed");
     }
 
-    // метод добавления нового устройсва в Map DeviceList - возвращает false, если устройство уже существует в списке
+// метод добавления нового устройсва в Map DeviceList - возвращает false, если устройство уже существует в списке
     public boolean addDevice(Device d) {
         System.out.println("MainForm: addDevice started");
         if (!DeviceList.containsKey(d.getId())) { // если такого устройство существует в списке - возвращает false
@@ -286,7 +300,7 @@ public class MainForm extends javax.swing.JFrame {
      * @param id -id устройсва
      * @param connection - boolean состояния соединения, true - установлено
      */
-    //метод используется для актуализации визуального отображения состояния коннекта.
+//метод используется для актуализации визуального отображения состояния коннекта.
     public void deviceConnection(String id, boolean connection) {
         Device device = (Device) Start.mf.DeviceList.get(id);
         device.setConnection(connection);
@@ -294,8 +308,8 @@ public class MainForm extends javax.swing.JFrame {
         PanelDevice pd = (PanelDevice) PanelDeviceList.get(device.getId());
         pd.redrawPanel(); // метод перерисовки панели (изменение цвета индикатора)
     }
-// метод аналогичный предыдущему - используется для актуализации состояния контроллируемого оборудования (true - включено)
 
+// метод аналогичный предыдущему - используется для актуализации состояния контроллируемого оборудования (true - включено)
     public void deviceStatus(String id, boolean status) {
         Device device = (Device) DeviceList.get(id);
         device.setStatus(status);
@@ -309,7 +323,7 @@ public class MainForm extends javax.swing.JFrame {
         timeMap.put(device, System.currentTimeMillis());
         Thread t1 = new Thread(DL);
         t1.start();
-        System.out.println("MainForm: createListener executed");
+        System.out.println("MainForm: createListener for device " + device.getId() + " executed");
     }
 
 

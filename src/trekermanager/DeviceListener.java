@@ -6,25 +6,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 //Класс предназначенный для создания и обработки соединения с одним устройством
 public class DeviceListener implements Runnable {
 
     private ServerSocket serverSocket;
     private Device device;
-    private Socket cs;
     private InputStream in;
     private OutputStream out;
     private int length = 0;
     private Socket clientSocket;
-    byte[] incoming;
+    private byte[] incoming;
 
     private boolean status = true;  // статус соединения\открытого ClientSocker
     private long time1;
     private long time2;
-    boolean switcher = true;
+    private boolean switcher = true;
 
     public DeviceListener() {
         this(new Device()); // пустой конструктор Device вернёт элемент с стандартными данными
@@ -38,44 +35,60 @@ public class DeviceListener implements Runnable {
         try {
             serverSocket = new ServerSocket(device.getPort());
             clientSocket = new Socket();
-            clientSocket = serverSocket.accept();
-            status = Start.mf.getWatcherStatus(device); // в локальную переменную записываем значение из MainForm - изначально оно = true
-
-            while (Start.mf.getWatcherStatus(device)) { //т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
-                if (!clientSocket.isClosed()) { // подлежит доработке для адекватной отработки кода
-                    Start.mf.setWatcherStatus(device, true); // логическое дублирование, если сокет запущен вторично. вероятно бесполезно
-                    Start.mf.deviceConnection(device.getId(), true); // если .accept прошёл - TCP соединение установлено
-                 
-                    in = clientSocket.getInputStream();
-                    out = clientSocket.getOutputStream();
-                 
-                    incoming = new byte[256];
-                    length = in.read(incoming);
-                  
-                    System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
-                    String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
-                
-                    if (reply.equals("empty")) { //если вернулось empty - устройство разорвало соединение со своей стороны.
-                        System.err.println("DeviceListener: empty answer");
-                        Start.mf.setWatcherStatus(device, false); // соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
-                    } else {
-                        out.write(reply.getBytes());
-                        System.out.println("DeviceListener: getPacket executed");
-                    }
-                }
-            }
+            System.out.println("DeviceListener: Listener " + device.getId() + " started. Port " + serverSocket.getLocalPort() + " status=" + clientSocket.toString());
         } catch (IOException ex) {
-            closeListener();
-            Start.mf.deviceConnection(device.getId(), false);
-            System.err.println("IOException in listener " + device.getId() + " : " + ex.getMessage());
+            System.err.println("DeviceListener: IOException in listener(clientSocket = serverSocket) " + device.getId() + " : " + ex.getMessage());
 
         }
+        try {
+            clientSocket = serverSocket.accept();
+        } catch (IOException ex) {
+            System.err.println("DeviceListener: IOException in listener(clientSocket = serverSocket.accept()) " + device.getId() + " : " + ex.getMessage());
+
+        }
+        Start.mf.setSocket(device, serverSocket);
+
+        status = Start.mf.getWatcherStatus(device); // в локальную переменную записываем значение из MainForm - изначально оно = true
+        System.out.println("DeviceListener " + device.getId() + ": client socket got accept  status=" + clientSocket.toString());
+
+        while (Start.mf.getWatcherStatus(device)) { //т.к. сокет был закрыт - возвращаем зачение false (которое должно быть уже задано в нужной коллекции
+            Start.mf.deviceConnection(device.getId(), true); // если .accept прошёл - TCP соединение установлено
+            try {
+                in = clientSocket.getInputStream();
+                out = clientSocket.getOutputStream();
+
+                incoming = new byte[256];
+                length = in.read(incoming);
+            } catch (IOException ex) {
+                System.err.println("DeviceListener:IOException in listener(getInputStream) " + device.getId() + " : " + ex.getMessage());
+
+            }
+            Start.mf.setTime(device, System.currentTimeMillis()); // считаем, что пакет пришёл - значит нужно обновить время
+            System.out.println("Client query(" + length + " bytes):" + new String(incoming).trim());
+            String reply = makeAnswer(incoming); // выполняется метод, который возвращает устройству требуемый ответ в зависимости от пришедшего пакета
+
+            if (reply.equals("empty")) { //если вернулось empty - устройство разорвало соединение со своей стороны.
+                System.err.println("DeviceListener: empty answer");
+                Start.mf.setWatcherStatus(device, false); // соединение разорвано и требуется запустить новый поток с новым Listener для этого порта и устройства
+            } else {
+                try {
+                    out.write(reply.getBytes());
+                    out.flush();
+                } catch (IOException ex) {
+                    System.err.println("DeviceListener:IOException in listener(out.write) " + device.getId() + " : " + ex.getMessage());
+
+                }
+                System.out.println("DeviceListener: getPacket executed");
+                //       }
+            }
+        }
+
     }
 
     private String makeAnswer(byte[] data) {
         String message[] = new String(data).trim().split("#");
 //        System.out.println("Message. mess[0]=" + message[0] + "mess1="+message[1]+"  mess length=" + message.length);
-        if (message.length > 0) {
+        if (message.length > 1) {
             switch (message[1]) {
                 case "L":
                     // System.err.println("1");
@@ -153,19 +166,8 @@ public class DeviceListener implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("DeviceListener: Listener" + device.getId() + "__" + device.getPort() + " created");
+        System.out.println("DeviceListener: Listener " + device.getId() + "__" + device.getPort() + " started");
         makeConnection();
     }
 
-    private void closeListener() {//метод закрывающий текущий листенер
-
-        try {
-            serverSocket.close();
-            cs.close();
-            Start.mf.deviceConnection(device.getId(), false);
-            Start.mf.deviceStatus(device.getId(), false);
-        } catch (IOException ex1) {
-            Logger.getLogger(DeviceListener.class.getName()).log(Level.SEVERE, null, ex1);
-        }
-    }
 }

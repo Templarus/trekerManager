@@ -1,6 +1,8 @@
 package trekermanager;
 
 import UI.Start;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,27 +28,30 @@ public class Watcher implements Runnable {
 
         while (true) {
             keys = Start.mf.getDevicesKeySet();
-            DeviceList = Start.mf.getDeviceList(); // заполняем локальный DeviceList элементами родительского
+            DeviceList = Start.mf.getDeviceList(); // заполняем локальные коллекциями элементами родительских
             timeMap = Start.mf.getTimeMap();
+            System.out.println("-----------------------------------------------");
             for (String key : keys) {
                 Device device = (Device) DeviceList.get(key); // вытаскиваем device из DeviceList по ключу, чтобы затем использовать в качестве ключа в коллекции WatcherList и вернуть статус
 
                 time1 = (Long) timeMap.get(device);
                 time2 = System.currentTimeMillis();
                 if (Start.mf.getWatcherStatus(device)) { // СЮДА НУЖНО БЫ ДОБАВИТЬ ПРОВЕРКУ "ВКЛЮЧЕННОСТИ" УСТРОЙСТВА
-                    if (time2 - time1 > timeLimit && Start.mf.getWatcherStatus(device) == true) {
-                        System.err.println("TIMELIMIT OVERLAPTED");
+                    System.out.println("Wathcer: device=" + key + " time difference=" + (time2 - time1));
+                    if (time2 - time1 > timeLimit) {
+                        System.err.println("Wathcer: TIMELIMIT OVERLAPTED :" + key);
                         Start.mf.setWatcherStatus(device, false);
-
+                        closeListener(device);
                     }
-                }
-                if (Start.mf.getWatcherStatus(device) == false) {
+                } else {
+                    System.out.println("Wathcer: recreating DeviceListener for device " + key);
                     Start.mf.createListener(device);// если false - создаём listener с этим устройством
                 }
             }
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
 
             try {
-                Thread.sleep(1000); // чтобы не вешать систему проверка проходит раз в секунду
+                Thread.sleep(10000); // чтобы не вешать систему проверка проходит раз в 10 секунд
             } catch (InterruptedException ex) {
                 Logger.getLogger(Watcher.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -57,4 +62,19 @@ public class Watcher implements Runnable {
     public void run() {
         Check();
     }
+
+    private void closeListener(Device device) {//метод закрывающий текущий листенер
+        ServerSocket ss = Start.mf.getSocket(device);
+        System.err.println("Listener " + device.getId() + " closed");
+        Start.mf.deviceStatus(device.getId(), false);
+        Start.mf.deviceConnection(device.getId(), false);
+        try {
+            ss.close();
+        } catch (IOException ex) {
+            System.err.println("Watcher: IOException in close( ss.close()) " + device.getId() + " : " + ex.getMessage());
+
+        }
+
+    }
 }
+

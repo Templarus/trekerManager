@@ -7,29 +7,29 @@ import java.util.HashMap;
 // так же, при инициализации через конструктор, происходит запись пакета в базу данных при помощи переопределённого метода
 public class PackageData extends Pack {
 
-    String id;
-    String date;
-    String time;
-    String lat = "";
-    String lon = "";
-    int speed;
-    int course;
-    int height;
-    int sats;
-    int idx;
-    int mcc;
-    int mnc;
-    int lac;
-    int cid;
-    int vext;
-    float hdop;
-    int digitinput;
-    int digitouput;
-    String ads;
-    String ibutton;
-    String params;
-    boolean input1;
-    boolean input2;
+    private String id;
+    private String date;
+    private String time;
+    private String lat ;
+    private String lon ;
+    private int speed;
+    private int course;
+    private int height;
+    private int sats;
+    private int idx;
+    private int mcc;
+    private int mnc;
+    private int lac;
+    private int cid;
+    private int vext;
+    private  float hdop;
+    private int digitinput;
+    private int digitouput;
+    private String ads;
+    private String ibutton;
+    private String params;
+    private boolean input1;
+    private boolean input2;
 //D#020100;030326;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;000000000000;IDX:1:107,MCC:1:250,MNC:1:1,LAC:1:407,CID:1:56625,Vext:1:8376,IN1:1:0,IN2:1:0
 
     public PackageData(String id, String date, String time, String lat, String lon, int speed, int course, int height, int sats, float hdop, int digitinput, int digitoutput, String ads, String ibutton, String params) {
@@ -141,4 +141,97 @@ public class PackageData extends Pack {
         }
         Start.mf.sdb.setPackageData(this);
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public String getLon() {
+        return lon;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getCourse() {
+        return course;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getSats() {
+        return sats;
+    }
+
+    public int getIdx() {
+        return idx;
+    }
+
+    public int getMcc() {
+        return mcc;
+    }
+
+    public int getMnc() {
+        return mnc;
+    }
+
+    public int getLac() {
+        return lac;
+    }
+
+    public int getCid() {
+        return cid;
+    }
+
+    public int getVext() {
+        return vext;
+    }
+
+    public float getHdop() {
+        return hdop;
+    }
+
+    public int getDigitinput() {
+        return digitinput;
+    }
+
+    public int getDigitouput() {
+        return digitouput;
+    }
+
+    public String getAds() {
+        return ads;
+    }
+
+    public String getIbutton() {
+        return ibutton;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public boolean isInput1() {
+        return input1;
+    }
+
+    public boolean isInput2() {
+        return input2;
+    }
+    
 }

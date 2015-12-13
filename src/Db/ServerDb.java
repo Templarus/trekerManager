@@ -1,5 +1,5 @@
 
-package trekermanager;
+package Db;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,14 +12,13 @@ import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.sql.Time;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.sql.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import trekermanager.Device;
+import trekermanager.PackageData;
 
 public class ServerDb implements Constatnts {
 
@@ -345,11 +344,11 @@ public class ServerDb implements Constatnts {
     }
 
     public synchronized int setPackageData(PackageData pd) {
-        System.out.println("pd.date=" + pd.date);
+    //    System.out.println("pd.date=" + pd.date);
 
         sql = "INSERT INTO PackageDate "
                 + "(deviceId,date, time, lat, lon, speed, course, height, sats, hdop, digitinput, digitouput, ads, ibutton, params, input2) \n"
-                + "VALUES ('" + pd.id + "','" + Methods.dateToString(pd.date) + "','" + Methods.timeToString(pd.time) + "','" + pd.lat + "','" + pd.lon + "','" + pd.speed + "','" + pd.course + "','" + pd.height + "','" + pd.sats + "','" + pd.hdop + "','" + pd.digitinput + "','" + pd.digitouput + "','" + pd.ads + "','" + pd.ibutton + "','" + pd.params + "','" + pd.input2 + "')";//
+                + "VALUES ('" + pd.getId() + "','" + Methods.dateToString(pd.getDate()) + "','" + Methods.timeToString(pd.getTime()) + "','" + pd.getLat() + "','" + pd.getLon() + "','" + pd.getSpeed() + "','" + pd.getCourse() + "','" + pd.getHeight() + "','" + pd.getSats() + "','" + pd.getHdop() + "','" + pd.getDigitinput() + "','" + pd.getDigitouput() + "','" + pd.getAds() + "','" + pd.getIbutton() + "','" + pd.getParams() + "','" + pd.isInput2() + "')";//
         if (insertDb(sql) > 0) {
             return Constatnts.OK;
         } else {

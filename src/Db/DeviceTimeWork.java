@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package trekermanager;
+package Db;
 
 import java.sql.Time;
 import java.sql.Date;
 
 /**
- *
+ * 
  * @author Asus
  */
 public class DeviceTimeWork {
