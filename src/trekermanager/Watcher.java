@@ -51,7 +51,7 @@ public class Watcher implements Runnable {
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
 
             try {
-                Thread.sleep(10000); // чтобы не вешать систему проверка проходит раз в 10 секунд
+                Thread.sleep(5000); // чтобы не вешать систему проверка проходит раз в 10 секунд
             } catch (InterruptedException ex) {
                 Logger.getLogger(Watcher.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -65,16 +65,18 @@ public class Watcher implements Runnable {
 
     private void closeListener(Device device) {//метод закрывающий текущий листенер
         ServerSocket ss = Start.mf.getSocket(device);
-        System.err.println("Listener " + device.getId() + " closed");
         Start.mf.deviceStatus(device.getId(), false);
         Start.mf.deviceConnection(device.getId(), false);
-        try {
-            ss.close();
-        } catch (IOException ex) {
-            System.err.println("Watcher: IOException in close( ss.close()) " + device.getId() + " : " + ex.getMessage());
-
-        }
+//        try {
+//            if (ss.isBound()) {
+//                System.err.println("Listener " + device.getId() + " closed");
+//
+//                ss.close();
+//            }
+//        } catch (IOException ex) {
+//            System.err.println("Watcher: IOException in close( ss.close()) " + device.getId() + " : " + ex.getMessage());
+//
+//        }
 
     }
 }
-
