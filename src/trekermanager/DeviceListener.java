@@ -39,7 +39,7 @@ public class DeviceListener implements Runnable {
         }
         try {
             clientSocket = serverSocket.accept();
-            clientSocket.setSoTimeout(60000);
+            clientSocket.setSoTimeout(80000);
         } catch (IOException ex) {
             System.err.println("DeviceListener: IOException in listener(clientSocket = serverSocket.accept()) " + device.getId() + " : " + ex.getMessage());
         }
