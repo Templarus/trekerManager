@@ -19,7 +19,6 @@ public class MainForm extends javax.swing.JFrame {
     private Map PanelDeviceList = new HashMap<String, PanelDevice>(); //содержит "список панелей" для отображения статуса устройств, ключ = id устройства
     private Map WatcherList = new HashMap<Device, Boolean>(); // содержит статусы DeviceListener для каждого устройства, ключ = указатель на устройство
     private Map timeMap = new HashMap<Device, Long>();// содержит тайминги последнего пакета для каждого устройства
-    private Map socketMap = new HashMap<Device, ServerSocket>();
     public static FormDeviceParams FDP; // popup для добавления нового устройства в пул "на лету"
 
     public static ServerDb sdb;
@@ -129,18 +128,7 @@ public class MainForm extends javax.swing.JFrame {
         return timeMap;
     }
 
-    public ServerSocket getSocket(Device d) {
-
-        return (ServerSocket) socketMap.get(d);
-
-    }
-
-    public void setSocket(Device d, ServerSocket serversocket) {
-
-        socketMap.put(d, serversocket);
-
-    }
-
+    
     public void setTime(Device device, Long time) {
         timeMap.put(device, time);
     }

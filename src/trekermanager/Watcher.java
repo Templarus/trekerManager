@@ -1,7 +1,6 @@
 package trekermanager;
 
 import UI.Start;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,7 @@ public class Watcher implements Runnable {
     private Set<String> keys;
     private long time1;
     private long time2;
-    private final int timeLimit = 120000;
+    private final int timeLimit = 240000;
 
     public Watcher() {
 
@@ -45,6 +44,7 @@ public class Watcher implements Runnable {
                     }
                 } else {
                     System.out.println("Wathcer: recreating DeviceListener for device " + key);
+                  
                     Start.mf.createListener(device);// если false - создаём listener с этим устройством
                 }
             }
@@ -53,7 +53,8 @@ public class Watcher implements Runnable {
             try {
                 Thread.sleep(5000); // чтобы не вешать систему проверка проходит раз в 10 секунд
             } catch (InterruptedException ex) {
-                Logger.getLogger(Watcher.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println("Watcher: Threading in close( sleep(5000) : " + ex.getMessage());
+
             }
         }
     }
@@ -64,19 +65,10 @@ public class Watcher implements Runnable {
     }
 
     private void closeListener(Device device) {//метод закрывающий текущий листенер
-        ServerSocket ss = Start.mf.getSocket(device);
         Start.mf.deviceStatus(device.getId(), false);
         Start.mf.deviceConnection(device.getId(), false);
-//        try {
-//            if (ss.isBound()) {
-//                System.err.println("Listener " + device.getId() + " closed");
-//
-//                ss.close();
-//            }
-//        } catch (IOException ex) {
-//            System.err.println("Watcher: IOException in close( ss.close()) " + device.getId() + " : " + ex.getMessage());
-//
-//        }
+        System.err.println("Watcher:  close( ss.close()) " + device.getId());
+        //System.err.println("Watcher: IOException in close( ss.close()) " + device.getId() + " : " + ex.getMessage());
 
     }
 }
