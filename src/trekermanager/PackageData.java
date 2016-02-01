@@ -87,40 +87,8 @@ public class PackageData extends Pack {
             }
 
         }
-//        this.idx = Integer.parseInt(IDX[2]);
-//        this.mcc = Integer.parseInt(MCC[2]);
-//        this.mnc = Integer.parseInt(MNC[2]);
-//        this.lac = Integer.parseInt(LAC[2]);
-//        this.cid = Integer.parseInt(CID[2]);
-//        this.vext = Integer.parseInt(Vext[2]);
-//        this.input1 = Integer.parseInt(In1[2]) == 1;
-//        this.input1 = Integer.parseInt(In1[2]) == 1;
-//
-//        String IDX[] = paramsbody[0].split(":");
-//        this.idx = Integer.parseInt(IDX[2]);
-//
-//        String MCC[] = paramsbody[1].split(":");
-//        this.mcc = Integer.parseInt(MCC[2]);
-//
-//        String MNC[] = paramsbody[2].split(":");
-//        this.mnc = Integer.parseInt(MNC[2]);
-//
-//        String LAC[] = paramsbody[3].split(":");
-//        this.lac = Integer.parseInt(LAC[2]);
-//
-//        String CID[] = paramsbody[4].split(":");
-//        this.cid = Integer.parseInt(CID[2]);
-//
-//        String Vext[] = paramsbody[5].split(":");
-//        this.vext = Integer.parseInt(Vext[2]);
-//
-//        String In1[] = paramsbody[6].split(":");
-//        this.input1 = Integer.parseInt(In1[2]) == 1;
-//
-//        String In2[] = paramsbody[7].split(":");
-//        this.input2 = Integer.parseInt(In2[2]) == 1;
 
-        System.out.println("this.idx="+this.idx+ " this.mcc="+this.mcc+ " this.mnc"+this.mnc+" this.lac="+this.lac+" this.cid="+this.cid+" this.vext="+this.vext+" this.input1="+this.input1+" this.input2="+this.input1);
+        System.out.println("this.idx="+this.idx+ " this.mcc="+this.mcc+ " this.mnc="+this.mnc+" this.lac="+this.lac+" this.cid="+this.cid+" this.vext="+this.vext+" this.input1="+this.input1+" this.input2="+this.input1);
         SaveToDB();
     }
 
